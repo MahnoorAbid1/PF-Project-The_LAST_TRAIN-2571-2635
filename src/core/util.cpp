@@ -2,7 +2,7 @@
 using namespace std;
 
 // Primitive helper utilities, clamping, and screen control
-int clampInt(int val, int minVal, int maxVal);{
+int clampInt(int val, int minVal, int maxVal){
 int clampInt(int val, int minVal, int maxVal){
     if (val > maxVal){
         return maxVal;
@@ -11,10 +11,7 @@ int clampInt(int val, int minVal, int maxVal){
         return minVal;
     }
     return val;
-    return val; 
 }
-energy = clampInt(energy + 25, 0, 100);
-// eg: energy = clampInt(energy + 25, 0, 100) energy defined in main_core.cpp
 // eg: energy = clampInt(energy + 25, 0, 100) energy defined in main_core file
 
 void trimWhitespace(char* str) { //removes spaces, tabs, nextline char
