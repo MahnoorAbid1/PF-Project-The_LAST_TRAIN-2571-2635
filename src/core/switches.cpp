@@ -44,11 +44,22 @@ bool installFuseControlPanel(char inventory[MAX_INVENTORY_CAPACITY], int& invent
     objectives[OBJ_FUSE_INSTALLED] = true;
     applyScoreDelta(score, SCORE_INSTALL_FUSE);
     return true;
+    objectives[OBJ_FUSE_INSTALLED] = true; //ticks checkbox that fuse has been installed
+    applyScoreDelta(score, SCORE_INSTALL_FUSE); //gives player 20 points bcz score of installing fuse is 20 pts
+    return true; //proves that the code worked
 }
 
 bool verifyCabinetCode(const char* enteredCode, const bool objectives[NUM_OBJECTIVES]);
 
 
+//to open cabinet you need the right code
+bool verifyCabinetCode(const char* enteredCode, const bool objectives[NUM_OBJECTIVES]){
+    if (objectives[OBJ_CLUE_4] == false || objectives[OBJ_CLUE_2] == false || objectives[OBJ_CLUE_7] == false)
+        {return false;} //to figure out if the checkbox has been ticked before or not. If yes, code failed, cabinet remains shut
+    return stringEquals(enteredCode, "427"); //to check if order of digits is right (427)
+}
+//there are two checks in this code. if a person is a replayer, he would simply move to the cabinet and put in the code
+//but the game demands exploration and collecction of clues. so it demands the checkbox being ticked.
 
 
 

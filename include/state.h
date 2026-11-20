@@ -32,7 +32,7 @@ const char ENT_CABINET_TRAIN_KEY= '^'; // Cabinet / Train Key
 const char ENT_CAT_CARRIER      = '@'; // Cat Carrier
 const char ENT_OBSERVATION_TOKEN= '&'; // Observation Token
 
-// Index Constants for Parallel Objective Booleans
+// Index Constants for Parallel Objective Booleans //checkboxes to see if player performed all steps of the game or not
 const int OBJ_MASTER_KEY        = 0;
 const int OBJ_CLUE_4            = 1;
 const int OBJ_CLUE_2            = 2;
