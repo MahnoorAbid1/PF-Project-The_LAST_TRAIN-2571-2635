@@ -1,4 +1,5 @@
 #include "util.h"
+#include <cstdlib>
 using namespace std;
 
 // Primitive helper utilities, clamping, and screen control
@@ -43,14 +44,12 @@ void printHeader(const char* title) {   //prints title between two lines of ***
 }
 
 void clearScreen(){
-    //left for later
-    //#include <cstdlib>
-    //void clearScreen() {
-    //#ifdef _WIN32
-        //system("cls");
-    //#else
-        //system("clear");
-    //#endif
+    void clearScreen() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
 }
 
 
