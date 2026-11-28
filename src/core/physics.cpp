@@ -108,6 +108,8 @@ bool canTraverse(int targetFloor, int targetRoom, char connType, const char inve
 }
 
 // Finds out if two rooms are connected and what connects them (door, window, stairs, lift )
+//horizontalConn stores the coneections between the rooms on the same floor
+// ROOMS_PER_FLOOR - 1 is done bcz the connections are always less than the rooms e.g 4 rooms have 3 gaps b/w them
 bool isDirectlyConnected(int fromF, int fromR, int toF, int toR, const char horizontalConn[NUM_FLOORS][ROOMS_PER_FLOOR - 1], char& outConnType){
     
     outConnType=CONN_NONE; // Initialised with no connection
