@@ -1,9 +1,12 @@
 #include "level.h"
 #include "util.h"
-#include "physics.h" 
+#include "physics.h"
+#include <fstream>  //For reading files 
+#include <cstring>    //For using strlen which counts the letters in a line
+using namespace std;
 
 // Modular implementation using primitive arrays for map parsing and verification
-//Level cppc
+//Level cpp
 
 // Acts as a dictionary; you give it a symbol it gives back the name eg. '<' gives "Master Key"
 // char* means that the returned value is an address of a character
@@ -66,3 +69,105 @@ bool validateStartingRoom(int startFloor, int startRoom, const char horizontalCo
     // Didn't find a way out
     return false;
 }
+
+
+
+// It reads the map drawn in building.txt and fills the 3 arrays
+// It returns true if all five floors were successfully read, false if not
+bool loadBuildingMap(const char* filename, char horizontalConn[NUM_FLOORS][ROOMS_PER_FLOOR - 1], char roomEntities[NUM_FLOORS][ROOMS_PER_FLOOR][MAX_ENTITIES_PER_ROOM], int entityCounts[NUM_FLOORS][ROOMS_PER_FLOOR]){
+
+    const int MAX_LINE_LENGTH=200; //Longest line we can actually read(The longest line in building.txt is 72 characters; 200 is used just in case)
+
+    // First step: Empty out all the arrays so that they don't hold any garbage value initially
+    for ( int f=0; f < NUM_FLOORS ; f++){
+        for ( int r=0; r < ROOMS_PER_FLOOR ; r++ ){
+            entityCounts[f][r]=0; //Zero items yet
+            for ( int s=0; s < MAX_ENTITIES_PER_ROOM ; s++ ){
+                roomEntities[f][r][s]=ENT_NONE; //Every slot is empty
+            }
+            if ( r < ROOMS_PER_FLOOR-1 ){
+                horizontalConn[f][r]=CONN_NONE; // A connection doesn't exist yet
+            }
+
+        }
+    }
+
+    // Second step: Open the file
+    ifstream file(filename);
+    if (!file.is_open()){
+        return false;   // File is missing/ does not exist
+    }
+
+    char NameLine[MAX_LINE_LENGTH]; //Line having the room names, e.g. "| F5-R1   D F5-R2..."
+    char ItemLine[MAX_LINE_LENGTH]; //Line under it having the items, e.g."| 7 ^   |..."
+    int FloorsFound=0;
+
+    // Third step: Read the file line by line until you find all of the 5 floors
+    while ( FloorsFound < NUM_FLOORS && file.getline(NameLine, MAX_LINE_LENGTH)){
+        
+        // Fourth step: Find where each room's name starts e.g F5-R1
+        int NameColumn[ROOMS_PER_FLOOR]; //Column of each room's name
+        int RoomsFound=0;
+
+        for (int i=0; NameLine[i] !='\0' && RoomsFound < ROOMS_PER_FLOOR; i++){
+            // Room name has the following format: F, a digit, -, R
+            if (NameLine[i]== 'F' && NameLine[i+1] >= '0' && NameLine[i+1] <= '9' && NameLine[i+2] == '-' && NameLine[i+3] == 'R'){
+                NameColumn[RoomsFound]=i; //Remembers where the room starts
+                RoomsFound++;
+            }
+        }
+
+        if (RoomsFound != ROOMS_PER_FLOOR){
+            continue; // This line does not have any rooms, skip to the next line
+        }
+
+        // Fifth Step: Get the floor number from the name line( it is the digit after 'F')
+        int FloorNum=NameLine[NameColumn[0] + 1 ] -'0'; // Converts '5' into 5
+        if ( FloorNum < 1 || FloorNum > NUM_FLOORS) {
+            file.close();
+            return false; // File contains invalid data
+        }
+
+        int Row= FloorNum-1; //-1 bcz array starts at 0
+
+        // Sixth Step: Read connections (They are the two places before next room's name)
+        for (int Gap=0; Gap < ROOMS_PER_FLOOR-1; Gap++){
+            char C= NameLine[NameColumn[Gap+1] - 2];
+            if ( C== CONN_DOOR ||  C== CONN_WINDOW ||  C== CONN_LOCKED_DOOR ||  C== CONN_SOLID_WALL){
+                horizontalConn[Row][Gap]= C; // In case of Door, Window or locked door or solid wall
+            }
+            else{
+                horizontalConn[Row][Gap]= CONN_NONE; //Something else, e.g. the '1' of "L1" (Lift 1)
+
+            }
+        }
+
+        // Seventh Step : Read the item's line( the line under names)
+        if ( !file.getline(ItemLine, MAX_LINE_LENGTH)){
+            file.close();
+            return false; // Item line does not exist
+        }
+
+        int ItemLength=strlen(ItemLine); // Tells how many characters the line has
+        
+        // 8th step: Collects the items which are inside each room's box
+        for (int R = 0; R < ROOMS_PER_FLOOR; R++){
+            int col = NameColumn[R] - 1;                     //1st column inside this room
+            while (col < ItemLength && ItemLine[col] != '|'){   //Stop when room's wall comes
+                char C = ItemLine[col];
+                if (C != ' ' && C != '\r' && entityCounts[Row][R] < MAX_ENTITIES_PER_ROOM){
+                    roomEntities[Row][R][entityCounts[Row][R]] = C;   //Puts item in an empty slot
+                    entityCounts[Row][R]++;                             // One more item is added to the room
+                }
+                col++;                                    //Move on to the next column
+            }
+        }
+
+        FloorsFound++;                                    //This particular floor is done
+    }
+
+    //Step 9: Close the file
+    file.close();
+    return FloorsFound == NUM_FLOORS;                     //True only if all 5 floors were successfully read
+}
+
